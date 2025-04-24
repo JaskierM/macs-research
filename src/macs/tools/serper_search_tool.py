@@ -3,11 +3,11 @@ from langchain.tools import StructuredTool
 from pydantic import BaseModel, Field
 
 
-class GoogleSearchInput(BaseModel):
+class SerperSearchInput(BaseModel):
     query: str = Field(..., description="Search query for Google")
 
 
-def search_google(query: str) -> str:
+def _serper_search(query: str) -> str:
     try:
         serper = GoogleSerperAPIWrapper()
         return serper.run(query)
@@ -15,10 +15,13 @@ def search_google(query: str) -> str:
         return f"Error: {e}"
 
 
-def get_search_tool() -> StructuredTool:
+def get_serper_search_tool(
+    name: str = "SerperSearchTool",
+    description: str = "Uses Google via Serper.dev to search the web for relevant information",
+) -> StructuredTool:
     return StructuredTool.from_function(
-        func=search_google,
-        name="SearchTool",
-        description="Uses Google via Serper.dev to search the web for relevant information",
-        args_schema=GoogleSearchInput,
+        func=_serper_search,
+        name=name,
+        description=description,
+        args_schema=SerperSearchInput,
     )

@@ -1,105 +1,108 @@
 import os
 
-from langchain_community.chat_models import ChatOllama
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_ollama.chat_models import ChatOllama
+from langchain_ollama import OllamaEmbeddings
 
-from macs.tools.search_tool import get_search_tool
-from macs.tools.scrape_tool import get_scrape_tool
-from macs.tools.website_search_tool import get_website_search_tool
+from macs.tools.serper_search_tool import get_serper_search_tool
+from macs.tools.scrape_website_tool import get_scrape_website_tool
+from macs.tools.website_qa_tool import get_website_qa_tool
 from macs.agents.vulnerability_research_agent import get_vulnerability_research_agent
 from macs.agents.impact_analyzer_agent import get_impact_analyzer_agent
 from macs.agents.recommendation_expert_agent import get_recommendation_expert_agent
-from macs.crew.task import Task
-from macs.crew.crew import Crew
+from typing_extensions import TypedDict, Annotated
+from operator import add
+from langgraph.graph import StateGraph, START, END
 
 
 os.environ["SERPER_API_KEY"] = "c503b47583ccd2816fe20daf79737eff2461b40e"
 
 
-manager_llm = ChatOllama(model="mistral")
-embeddings_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+manager_llm = ChatOllama(
+    model="llama3.1",
+    base_url="http://localhost:11434",
+    temperature=0.1,
+)
+embeddings_model = OllamaEmbeddings(model="nomic-embed-text")
 
-search_tool = get_search_tool()
-scrape_tool = get_scrape_tool()
-website_search_tool = get_website_search_tool(
-    llm=manager_llm, embeddings_model=embeddings_model
+serper_search_tool = get_serper_search_tool()
+scrape_website_tool = get_scrape_website_tool()
+website_qa_tool = get_website_qa_tool(
+    llm=manager_llm,
+    embeddings_model=embeddings_model,
 )
 
-vulnerability_researcher_agent = get_vulnerability_research_agent(
-    manager_llm, [search_tool, scrape_tool, website_search_tool]
+vulnerability_research_agent = get_vulnerability_research_agent(
+    llm=manager_llm,
+    tools=[serper_search_tool, scrape_website_tool],
 )
 
 impact_analyzer_agent = get_impact_analyzer_agent(
-    manager_llm, [search_tool, website_search_tool]
+    llm=manager_llm,
+    tools=[serper_search_tool, scrape_website_tool],
 )
 
 recommendation_expert_agent = get_recommendation_expert_agent(
-    manager_llm, [search_tool, website_search_tool]
+    llm=manager_llm,
+    tools=[serper_search_tool, scrape_website_tool],
 )
 
-search_params = {
-    "vendor": "Cisco",
-    "product": "IOS XE",
-    "timeframe": "last 30 days",
-    "severity": "Critical",
+
+class GraphState(TypedDict):
+    query: str
+    vulns: str
+    impact: str
+    recommendations: str
+    history: Annotated[list[str], add]
+
+
+def vulnerability_research_node(state: GraphState) -> dict:
+    out = vulnerability_research_agent.invoke({"input": state["query"]})
+    return {
+        "vulns": out["output"],
+        "history": [f"🔍 research → {out['output'][:120]}…"],
+    }
+
+
+def impact_analyzer_node(state: GraphState) -> dict:
+    out = impact_analyzer_agent.invoke({"input": state["vulns"]})
+    return {"impact": out["output"], "history": [f"⚖️  impact → {out['output'][:120]}…"]}
+
+
+def recommendation_node(state: GraphState) -> dict:
+    out = recommendation_expert_agent.invoke({"input": state["impact"]})
+    return {
+        "recommendations": out["output"],
+        "history": [f"💡 recommend → {out['output'][:120]}…"],
+    }
+
+
+query = {
+    "query": "Research and identify new critical vulnerabilities with the following parameters:"
+    "- Vendor: Cisco"
+    "- Timeframe: 2025"
+    "- Severity: critical"
+    "Focus on:"
+    "1. Technical details of each vulnerability"
+    "2. Affected systems and versions"
+    "3. Exploitation methods"
+    "4. Current patch status"
+    "Format the output as a structured list with clear headers for each vulnerability."
 }
 
-research_task = Task(
-    description=f"""
-    Research and identify new critical vulnerabilities with the following parameters:
-    - Vendor: {search_params['vendor']}
-    - Product: {search_params['product']}
-    - Timeframe: {search_params['timeframe']}
-    - Severity: {search_params['severity']}
+builder = StateGraph(GraphState)
+builder.add_node("vulnerability_research", vulnerability_research_node)
+builder.add_node("impact_analyzer", impact_analyzer_node)
+builder.add_node("recommendation", recommendation_node)
 
-    Focus on:
-    1. Technical details
-    2. Affected systems
-    3. Exploitation methods
-    4. Patch availability
+builder.add_edge(START, "vulnerability_research")
+builder.add_edge("vulnerability_research", "impact_analyzer")
+builder.add_edge("impact_analyzer", "recommendation")
+builder.add_edge("recommendation", END)
 
-    Format the result as a structured list.
-    """,
-    agent=vulnerability_researcher_agent,
-    expected_output="Structured vulnerability list",
-)
+graph = builder.compile()
 
-analysis_task = Task(
-    description=f"""
-    Analyze the vulnerabilities discovered in the previous task.
-    For each one, assess:
-    - Business impact
-    - Risk level (Critical/High/Medium/Low)
-    - Potential consequences
-    - Affected industries
-    """,
-    agent=impact_analyzer_agent,
-    expected_output="Structed importain ",
-)
-
-recommendation_task = Task(
-    description=f"""
-    Provide a detailed remediation plan for the vulnerabilities found.
-    Include:
-    - Step-by-step mitigation
-    - Temporary workarounds
-    - Long-term recommendations
-    """,
-    agent=recommendation_expert_agent,
-    expected_output="Detailed remediation plan",
-)
-
-crew = Crew(
-    agents=[
-        vulnerability_researcher_agent,
-        impact_analyzer_agent,
-        recommendation_expert_agent,
-    ],
-    tasks=[research_task, analysis_task, recommendation_task],
-    verbose=2,
-)
-
-final_report = crew.run()
-
-print("\n=== FINAL MULTIAGENT OUTPUT ===\n")
-print(final_report)
+result = graph.invoke(query)
+print(result["recommendations"])
+print("\n--- History step by step ---")
+for line in result["history"]:
+    print(line)
