@@ -1,26 +1,37 @@
 import re
 
-from pydantic import BaseModel, Field
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.tools import StructuredTool
-from pydantic import BaseModel, Field, HttpUrl
-from typing import Union
+from pydantic import BaseModel, Field
+from typing import Dict
+
+from macs.tools.args_wrappers import structured_tool_wrapper
 
 
 class ScrapeWebsiteInput(BaseModel):
-    url: Union[str, HttpUrl] = Field(
-        ..., description="URL of the page to extract text from"
-    )
+    url: str = Field(..., description="Web-page URL to scrape")
 
 
-def _scrape_website(url: str) -> str:
+def _scrape_website(**kwargs) -> str:
     try:
-        loader = WebBaseLoader(url)
-        docs = loader.load()
+        web_loader = WebBaseLoader(kwargs.get("url", ""))
+        docs = web_loader.load()
         if not docs:
             return ""
-        raw_text = docs[0].page_content
-        clean_text = re.sub(r"\n{3,}", "\n\n", raw_text)
+
+        doc = docs[0]
+
+        clean_text = f"Source: {doc.metadata.get("source", "None")}\n"
+        clean_text += f"Title: {doc.metadata.get("title", "None")}\n"
+        clean_text += f"Description: {doc.metadata.get("description", "None")}\n"
+        clean_text += f"Language: {doc.metadata.get("language", "None")}\n"
+        clean_text += "-" * 20 + " Text from the site " + "-" * 20
+
+        page_content = doc.page_content
+        clean_text += re.sub(r"\n{3,}", "\n\n", page_content)
+        clean_text = re.sub(r"[ \t]+", " ", clean_text)
+        clean_text = re.sub(r"[ \t]*\n[ \t]*", "\n", clean_text)
+        clean_text = clean_text.strip()
         return clean_text
     except Exception as e:
         return f"Error: {e}"
@@ -28,10 +39,10 @@ def _scrape_website(url: str) -> str:
 
 def get_scrape_website_tool(
     name: str = "ScrapeWebsiteTool",
-    description: str = "Extracts all text from an HTML page by URL",
+    description: str = "Extracts all text from an HTML web-page by URL",
 ) -> StructuredTool:
     return StructuredTool.from_function(
-        func=_scrape_website,
+        func=structured_tool_wrapper(_scrape_website),
         name=name,
         description=description,
         args_schema=ScrapeWebsiteInput,

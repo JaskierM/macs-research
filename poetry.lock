@@ -2634,6 +2634,25 @@ testing = ["h5py (>=3.7.0)", "huggingface-hub (>=0.12.1)", "hypothesis (>=6.70.2
 torch = ["safetensors[numpy]", "torch (>=1.10)"]
 
 [[package]]
+name = "scrapingant-client"
+version = "2.1.0"
+description = "Official python client for the ScrapingAnt API."
+optional = false
+python-versions = "~=3.7"
+groups = ["main"]
+files = [
+    {file = "scrapingant-client-2.1.0.tar.gz", hash = "sha256:3d1aff60b5782623830f736665cdc0215fd8b7f9da6a4876ee80f2b1cbdddcd5"},
+    {file = "scrapingant_client-2.1.0-py3-none-any.whl", hash = "sha256:bec3688dfa12a6ddb478c5dae9065ad4e9f120915f6209de9ace76ac3533c3f2"},
+]
+
+[package.dependencies]
+requests = ">=2,<3"
+
+[package.extras]
+async = ["httpx (<1)"]
+dev = ["flake8 (>=7,<8)", "pytest (>=7,<8)", "pytest-asyncio (>=0,<1)", "pytest-httpx (>=0,<1)", "responses (>=0,<1)"]
+
+[[package]]
 name = "six"
 version = "1.17.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -3456,4 +3475,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "dbf0501c3499f2b8291e5f680a15beaa4a4a0b45dfaee9df966a806e3a2b8ef3"
+content-hash = "4c129211429434e4bd94079becab1260e261886cbf5c7ac6ffd964502d645ee7"
