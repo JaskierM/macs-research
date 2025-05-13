@@ -2,7 +2,7 @@ from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain.tools import StructuredTool
 from pydantic import BaseModel, Field
 
-from macs.tools.args_wrappers import structured_tool_wrapper
+# from macs.tools.args_wrappers import structured_tool_wrapper
 
 
 class SerperSearchInput(BaseModel):
@@ -22,7 +22,7 @@ def get_serper_search_tool(
     description: str = "Uses Google via Serper.dev to find and summarize relevant information from Google for a query",
 ) -> StructuredTool:
     return StructuredTool.from_function(
-        func=structured_tool_wrapper(_serper_search),
+        func=_serper_search,
         name=name,
         description=description,
         args_schema=SerperSearchInput,
