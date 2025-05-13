@@ -2,7 +2,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain.tools import StructuredTool
 from pydantic import BaseModel, Field
 
-from macs.tools.args_wrappers import structured_tool_wrapper
+# from macs.tools.args_wrappers import structured_tool_wrapper
 
 
 MAX_RESULTS = 10
@@ -30,7 +30,7 @@ def get_travily_search_tool(
     ),
 ) -> StructuredTool:
     return StructuredTool.from_function(
-        func=structured_tool_wrapper(_travily_search),
+        func=_travily_search,
         name=name,
         description=description,
         args_schema=TravilySarchInput,

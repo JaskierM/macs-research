@@ -5,25 +5,40 @@ from langchain_ollama import OllamaEmbeddings
 
 from macs.tools.serper_search_tool import get_serper_search_tool
 from macs.tools.travily_search_tool import get_travily_search_tool
-from macs.tools.scrape_website_tool import get_scrape_website_tool
 from macs.tools.website_qa_tool import get_website_qa_tool
 from macs.agents.vulnerability_research_agent import get_vulnerability_research_agent
-from macs.agents.impact_analyzer_agent import get_impact_analyzer_agent
-from macs.agents.recommendation_expert_agent import get_recommendation_expert_agent
 
 load_dotenv()
 
 
 def test_vulnerability_research_agent(
-    vulnerability_research_agent: AgentExecutor, input_text: str
+    vulnerability_research_agent: AgentExecutor, input_query: str
 ):
-    result = vulnerability_research_agent.invoke({"input": input_text})
+    result = vulnerability_research_agent.invoke(
+        {"messages": [{"role": "user", "content": input_query}]},
+    )
+    return result
+
+
+def test_impact_analyzer_agent(impact_analyzer_agent: AgentExecutor, input_query: str):
+    result = impact_analyzer_agent.invoke(
+        {"messages": [{"role": "user", "content": input_query}]},
+    )
+    return result
+
+
+def test_recommendation_expert_agent(
+    recommendation_expert_agent: AgentExecutor, input_query: str
+):
+    result = recommendation_expert_agent.invoke(
+        {"messages": [{"role": "user", "content": input_query}]},
+    )
     return result
 
 
 def main():
     llm = ChatOllama(
-        model="llama3.1:8b",
+        model="llama3.1",
         base_url="http://localhost:11434",
         temperature=0.1,
     )
@@ -31,7 +46,6 @@ def main():
 
     serper_search_tool = get_serper_search_tool()
     travily_search_tool = get_travily_search_tool()
-    scrape_website_tool = get_scrape_website_tool()
     website_qa_tool = get_website_qa_tool(llm=llm, embeddings_model=embeddings_model)
 
     vulnerability_research_agent = get_vulnerability_research_agent(
@@ -39,17 +53,14 @@ def main():
         tools=[
             serper_search_tool,
             travily_search_tool,
-            # scrape_website_tool,
             website_qa_tool,
         ],
     )
-    
-    vulnerability_research_agent.tools
 
-    input_msg = {
-        "input": "Research and identify new critical vulnerabilities with the following parameters:"
+    user_query = (
+        "Research and identify new critical vulnerabilities with the following parameters:"
         "- Vendor: Cisco"
-        "- Timeframe: 2025 year"
+        "- Timeframe: 2023-2025 years"
         "- Severity: critical"
         "Focus on:"
         "1. Technical details of each vulnerability"
@@ -57,13 +68,11 @@ def main():
         "3. Exploitation methods"
         "4. Current patch status"
         "Format the output as a structured list with clear headers for each vulnerability."
-    }
-    
-    result = travily_search_tool.run('{"query": "Cybersecurity vulnerabilities"}')
-    print(result)
+    )
 
     result = test_vulnerability_research_agent(
         vulnerability_research_agent,
-        input_msg["input"],
+        user_query,
     )
-    print(result)
+    print(len(result["messages"]))
+    print(result["messages"][-1].content)

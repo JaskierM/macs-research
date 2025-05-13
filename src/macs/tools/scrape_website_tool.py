@@ -5,7 +5,7 @@ from langchain.tools import StructuredTool
 from pydantic import BaseModel, Field
 from typing import Dict
 
-from macs.tools.args_wrappers import structured_tool_wrapper
+# from macs.tools.args_wrappers import structured_tool_wrapper
 
 
 class ScrapeWebsiteInput(BaseModel):
@@ -42,7 +42,7 @@ def get_scrape_website_tool(
     description: str = "Extracts all text from an HTML web-page by URL",
 ) -> StructuredTool:
     return StructuredTool.from_function(
-        func=structured_tool_wrapper(_scrape_website),
+        func=_scrape_website,
         name=name,
         description=description,
         args_schema=ScrapeWebsiteInput,
