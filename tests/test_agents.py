@@ -6,7 +6,7 @@ from langchain_ollama import OllamaEmbeddings
 from macs.tools.serper_search_tool import get_serper_search_tool
 from macs.tools.travily_search_tool import get_travily_search_tool
 from macs.tools.website_qa_tool import get_website_qa_tool
-from macs.agents.vulnerability_research_agent import get_vulnerability_research_agent
+from macs.agents.vulnerability_researcher import get_vulnerability_research_agent
 
 load_dotenv()
 

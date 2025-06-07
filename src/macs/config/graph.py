@@ -1,7 +1,7 @@
 from typing import TypedDict, Optional
 
 
-class VulnSystemState(TypedDict):
+class VulnResearchSystemState(TypedDict, total=False):
     input: str
     query: Optional[str]
     vulnerabilities_report: Optional[str]
