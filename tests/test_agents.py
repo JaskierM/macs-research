@@ -3,9 +3,9 @@ from langchain.agents import AgentExecutor
 from langchain_ollama.chat_models import ChatOllama
 from langchain_ollama import OllamaEmbeddings
 
-from macs.tools.serper_search_tool import get_serper_search_tool
-from macs.tools.travily_search_tool import get_travily_search_tool
-from macs.tools.website_qa_tool import get_website_qa_tool
+from macs.tools.serper_search import get_serper_search_tool
+from macs.tools.travily_search import get_travily_search_tool
+from macs.tools.website_qa import get_website_qa_tool
 from macs.agents.vulnerability_researcher import get_vulnerability_research_agent
 
 load_dotenv()

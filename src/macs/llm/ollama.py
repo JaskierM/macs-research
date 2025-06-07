@@ -1,6 +1,6 @@
 from typing import Sequence, List
-from langchain_community.chat_models import ChatOllama
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama.chat_models import ChatOllama
+from langchain_ollama.embeddings import OllamaEmbeddings
 
 from macs.llm.base import BaseLLM
 from macs.config.llm import OllamaSettings
@@ -9,13 +9,13 @@ from macs.llm.registry import LLM_REGISTRY
 
 class OllamaLLM(BaseLLM):
 
-    def __init__(self, cfg: OllamaSettings) -> None:
+    def __init__(self, settings: OllamaSettings) -> None:
         self._chat = ChatOllama(
-            model=cfg.model,
-            base_url=cfg.base_url,
-            temperature=cfg.temperature,
+            model=settings.model,
+            base_url=settings.base_url,
+            temperature=settings.temperature,
         )
-        self._embed = OllamaEmbeddings(model=cfg.embed_model)
+        self._embed = OllamaEmbeddings(model=settings.embed_model)
 
     async def chat(self, messages: Sequence[str], **kwargs) -> str:
         resp = await self._chat.ainvoke(list(messages), **kwargs)

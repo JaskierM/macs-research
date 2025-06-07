@@ -3,10 +3,10 @@ from langchain_ollama.chat_models import ChatOllama
 from langchain_ollama import OllamaEmbeddings
 from langchain.tools import StructuredTool
 
-from macs.tools.serper_search_tool import get_serper_search_tool
-from macs.tools.travily_search_tool import get_travily_search_tool
-from macs.tools.scrape_website_tool import get_scrape_website_tool
-from macs.tools.website_qa_tool import get_website_qa_tool
+from macs.tools.serper_search import get_serper_search_tool
+from macs.tools.travily_search import get_travily_search_tool
+from macs.tools.scrape_website import get_scrape_website_tool
+from macs.tools.website_qa import get_website_qa_tool
 
 load_dotenv()
 
