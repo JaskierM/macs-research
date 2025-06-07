@@ -12,8 +12,7 @@ class BaseLLMSettings(BaseSettings):
     model: str = Field(..., alias="LLM_MODEL")
     embed_model: str = Field(..., alias="EMBED_MODEL")
     temperature: Optional[float] = Field(0.2, alias="LLM_TEMPERATURE")
-    max_tokens: Optional[int] = Field(None, ealiasnv="LLM_MAX_TOKENS")
-
+    
     model_config = SettingsConfigDict(env_file=str(ENV_PATH), extra="ignore")
 
 
