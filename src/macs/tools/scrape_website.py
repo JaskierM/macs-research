@@ -38,7 +38,7 @@ class ScrapeWebsiteTool(StructuredTool):
             return clean_text
 
         except Exception as e:
-            return f"[ScrapeWebsite error] {e}"
+            return f"[ScrapeWebsite error] {e}."
 
     async def _arun(self, url: str) -> str:
         return self._run(url)

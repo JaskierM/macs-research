@@ -2,7 +2,7 @@ from typing import Type
 from langchain.tools import StructuredTool
 from langchain_community.tools.tavily_search import TavilySearchResults
 
-from macs.config.tools import TavilySearchSettings, TavilySearchInput
+from macs.config.tools import TavilySearchConfig, TavilySearchInput
 from macs.tools.registry import TOOL_REGISTRY
 
 
@@ -13,7 +13,7 @@ class TavilySearchTool(StructuredTool):
     )
     args_schema: Type[TavilySearchInput] = TavilySearchInput
 
-    def __init__(self, settings: TavilySearchSettings | None = None) -> None:
+    def __init__(self, settings: TavilySearchConfig | None = None) -> None:
         super().__init__()
         self._search = TavilySearchResults(**settings.model_dump())
 
@@ -22,16 +22,16 @@ class TavilySearchTool(StructuredTool):
             res = self._search.run(query)
             return "\n".join(str(r) for r in res)
         except Exception as exc:
-            return f"[Tavily error] {exc}"
+            return f"[Tavily error] {exc}."
 
     async def _arun(self, query: str) -> str:
         try:
             res = await self._search.arun(query)
             return "\n".join(str(r) for r in res)
         except Exception as exc:
-            return f"[Tavily error] {exc}"
+            return f"[Tavily error] {exc}."
 
 
 @TOOL_REGISTRY.register("tavily_search")
 def build_tavily_search() -> StructuredTool:
-    return TavilySearchTool(TavilySearchSettings())
+    return TavilySearchTool(TavilySearchConfig())

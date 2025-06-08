@@ -23,14 +23,14 @@ class SerperSearchTool(StructuredTool):
             res = self._serper.run(query)
             return res
         except Exception as exc:
-            return f"[Tavily error] {exc}"
+            return f"[Tavily error] {exc}."
 
     async def _arun(self, query: str) -> str:
         try:
             res = await self._serper.arun(query)
             return res
         except Exception as exc:
-            return f"[Tavily error] {exc}"
+            return f"[Tavily error] {exc}."
 
 
 @TOOL_REGISTRY.register("serper_search")

@@ -1,52 +1,39 @@
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Iterable, Iterator
 
-from langchain_core.messages import AnyMessage
-from langchain_core.runnables import RunnableConfig
-from langgraph.graph import Graph
-from langgraph.prebuilt import create_react_agent
-from langgraph.prebuilt.chat_agent_executor import AgentState
+from pathlib import Path
+from typing import Callable
+from jinja2 import Environment, FileSystemLoader
+from langchain.tools import BaseTool
+from langchain.chat_models.base import BaseChatModel
+from langgraph.graph.graph import CompiledGraph
 
-from macs.config.agents.agent import AgentConfig
+from macs.core.registry import Registry
+from macs.tools.registry import TOOL_REGISTRY
+from macs.provider.registry import PROVIDER_REGISTRY
+from macs.config.agent import AgentConfig
+
+
+AGENT_REGISTRY: Registry[Callable[[], CompiledGraph]] = Registry()
+_PROMPTS_DIR = Path(__file__).resolve().parents[1] / "prompts"
 
 
 class BaseAgent(ABC):
 
-    def __init__(self, cfg: "AgentConfig"):
-        self.cfg = cfg
-        self._graph = self.build_graph()
+    def __init__(self, cfg: AgentConfig) -> None:
+        self._cfg = cfg
 
     @abstractmethod
-    def system_prompt(self) -> str: ...
+    def build(self) -> CompiledGraph: ...
 
-    def extra_prompt(self, state: AgentState) -> list[AnyMessage]:
-        return []
+    def _load_llm(self) -> BaseChatModel:
+        return PROVIDER_REGISTRY.get(self._cfg.provider_key)()
 
-    def prompt(self, state: AgentState, config: RunnableConfig) -> list[AnyMessage]:
+    def _load_prompt(self) -> str:
+        path = _PROMPTS_DIR / f"{self._cfg.prompt_name}.j2"
         return (
-            [{"role": "system", "content": self.system_prompt()}]
-            + self.extra_prompt(state)
-            + list(state["messages"])
+            Environment(loader=FileSystemLoader(_PROMPTS_DIR))
+            .get_template(path.name)
+            .render()
         )
-
-    def build_graph(self) -> Graph:
-        return create_react_agent(
-            model=self.cfg.model,
-            tools=self.cfg.tools,
-            prompt=self.prompt,
-            debug=self.cfg.debug,
-            checkpointer=self.cfg.checkpointer,
-        )
-
-    def invoke(self, state: AgentState, *, config: RunnableConfig | None = None) -> Any:
-        return self._graph.invoke(state, config=config or {})
-
-    def stream(
-        self,
-        state: AgentState,
-        *,
-        config: RunnableConfig | None = None,
-        stream_mode: str | Iterable[str] = "values",
-    ) -> Iterator[Any]:
-        return self._graph.stream(state, config=config or {}, stream_mode=stream_mode)
