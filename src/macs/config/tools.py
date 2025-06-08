@@ -10,7 +10,9 @@ _ENV_PATH = _PROJECT_ROOT / ".env"
 class TavilySearchConfig(BaseSettings):
     max_results: Optional[int] = Field(10, alias="TAVILY_SEARCH_MAX_RESULTS")
 
-    model_config = SettingsConfigDict(env_file=str(_ENV_PATH), extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="TAVILY_SEARCH_", env_file=str(_ENV_PATH), extra="ignore"
+    )
 
 
 class TavilySearchInput(BaseModel):
@@ -26,11 +28,13 @@ class ScrapeWebsiteInput(BaseModel):
 
 
 class WebsiteQAConfig(BaseSettings):
-    provider_key: str = Field(..., alias="WEBSITE_QA_PROVIDER")
-    max_chunk_size: Optional[int] = Field(500, alias="WEBSITE_QA_MAX_CHUNK_SIZE")
-    chunk_overlap: Optional[int] = Field(50, alias="WEBSITE_QA_MAX_CHUNK_OVERLAP")
+    provider_key: str = Field(...)
+    max_chunk_size: Optional[int] = Field(500)
+    chunk_overlap: Optional[int] = Field(50)
 
-    model_config = SettingsConfigDict(env_file=str(_ENV_PATH), extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="WEBSITE_QA_", env_file=str(_ENV_PATH), extra="ignore"
+    )
 
 
 class WebsiteQAInput(BaseModel):

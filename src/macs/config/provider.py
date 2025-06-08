@@ -17,4 +17,8 @@ class BaseProviderConfig(BaseSettings):
 
 
 class OllamaConfig(BaseProviderConfig):
-    base_url: Optional[str] = Field("http://localhost:11434", alias="OLLAMA_BASE_URL")
+    base_url: Optional[str] = Field("http://localhost:11434")
+
+    model_config = SettingsConfigDict(
+        env_prefix="OLLAMA", env_file=str(_ENV_PATH), extra="ignore"
+    )

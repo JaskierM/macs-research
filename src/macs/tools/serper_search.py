@@ -9,8 +9,8 @@ from macs.tools.registry import TOOL_REGISTRY
 class SerperSearchTool(StructuredTool):
     name: str = "serper_search"
     description: str = (
-        "Uses Google via Serper.dev to find and summarize relevant information ",
-        "from Google for a query.",
+        "Uses Google via Serper.dev to find and summarize relevant information "
+        "from Google for a query."
     )
     args_schema: Type[SerperSearchInput] = SerperSearchInput
 

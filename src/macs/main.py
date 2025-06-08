@@ -3,7 +3,6 @@ from macs.tools.serper_search import build_serper_search
 from macs.tools.travily_search import build_tavily_search
 from macs.tools.scrape_website import build_scrape_website
 from macs.tools.website_qa import build_website_qa
-
 from macs.agents.vuln_researcher import build_vuln_researcher
 
 
@@ -31,18 +30,10 @@ result = website_qa_tool.invoke(
         "question": "What are the most common prevention systems?",
     }
 )
-print(result)
 
 
-vuln_researcher = build_vuln_researcher(
-    AgentConfig(
-        tools=tools,
-        llm_key="ollama",
-        prompt_name="vuln_researcher",
-        checkpointer=MemorySaver(),
-        debug=True,
-    )
-)
+vuln_researcher = build_vuln_researcher()
+
 
 input_msg = {
     "input": "Research and identify new critical vulnerabilities with the following parameters:"
@@ -56,3 +47,17 @@ input_msg = {
     "4. Current patch status"
     "Format the output as a structured list with clear headers for each vulnerability."
 }
+
+
+response = vuln_researcher.invoke(
+    {
+        "messages": [
+            {
+                "role": "user",
+                "content": "Какие критические уязвимости были найдены в Chrome в июне 2024 года?",
+            }
+        ]
+    }
+)
+
+print(response["messages"][-1].content)
