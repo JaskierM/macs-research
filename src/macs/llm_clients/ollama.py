@@ -2,12 +2,12 @@ from typing import Sequence, List
 from langchain_ollama.chat_models import ChatOllama
 from langchain_ollama.embeddings import OllamaEmbeddings
 
-from macs.provider.base import BaseProvider
+from macs.llm_clients.base import BaseLLMClient
 from macs.config.provider import OllamaConfig
-from macs.provider.registry import PROVIDER_REGISTRY
+from macs.llm_clients.registry import LLM_CLIENT_REGISTRY
 
 
-class OllamaProvider(BaseProvider):
+class OllamaLLMClient(BaseLLMClient):
 
     def __init__(self, cfg: OllamaConfig) -> None:
         self._llm = ChatOllama(
@@ -21,10 +21,12 @@ class OllamaProvider(BaseProvider):
             else None
         )
 
-    def get_llm(self) -> ChatOllama:
+    @property
+    def llm(self) -> ChatOllama:
         return self._llm
 
-    def get_embed_model(self) -> OllamaEmbeddings:
+    @property
+    def embed_model(self) -> OllamaEmbeddings:
         return self._embed_model
 
     async def chat(self, messages: Sequence[str], **kwargs) -> str:
@@ -35,6 +37,6 @@ class OllamaProvider(BaseProvider):
         return await self._embed_model.aembed_documents(list(texts))
 
 
-@PROVIDER_REGISTRY.register("ollama")
-def build_ollama_provider() -> BaseProvider:
-    return OllamaProvider(OllamaConfig())
+@LLM_CLIENT_REGISTRY.register("ollama")
+def build_ollama_llm_client() -> OllamaLLMClient:
+    return OllamaLLMClient(OllamaConfig())
