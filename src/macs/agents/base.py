@@ -9,7 +9,7 @@ from langgraph.graph.graph import CompiledGraph
 from langchain_core.tools import BaseTool
 
 from macs.config.agent import AgentConfig
-from macs.provider.registry import PROVIDER_REGISTRY
+from macs.llm_clients.registry import LLM_CLIENT_REGISTRY
 from macs.tools.registry import TOOL_REGISTRY
 
 
@@ -25,7 +25,7 @@ class BaseAgent(ABC):
     def build(self) -> CompiledGraph: ...
 
     def _load_llm(self) -> BaseChatModel:
-        return PROVIDER_REGISTRY.get(self._cfg.provider_key)().get_llm()
+        return LLM_CLIENT_REGISTRY.get(self._cfg.provider_key)().get_llm()
 
     def _load_tools(self) -> Sequence[BaseTool]:
         return [TOOL_REGISTRY.get(key)() for key in self._cfg.tool_keys or []]

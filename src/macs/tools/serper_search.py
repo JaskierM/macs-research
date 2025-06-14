@@ -2,7 +2,7 @@ from typing import Type
 from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain.tools import StructuredTool
 
-from macs.config.tools import SerperSearchInput
+from macs.config.tool import SerperSearchInput
 from macs.tools.registry import TOOL_REGISTRY
 
 

@@ -3,7 +3,7 @@ from langchain_ollama.chat_models import ChatOllama
 from langchain_ollama.embeddings import OllamaEmbeddings
 
 from macs.llm_clients.base import BaseLLMClient
-from macs.config.provider import OllamaConfig
+from macs.config.llm_client import OllamaConfig
 from macs.llm_clients.registry import LLM_CLIENT_REGISTRY
 
 
@@ -11,13 +11,13 @@ class OllamaLLMClient(BaseLLMClient):
 
     def __init__(self, cfg: OllamaConfig) -> None:
         self._llm = ChatOllama(
-            model=cfg.llm_key,
+            model=cfg.model,
             base_url=cfg.base_url,
             temperature=cfg.temperature,
         )
         self._embed_model = (
-            OllamaEmbeddings(model=cfg.embed_model_key, base_url=cfg.base_url)
-            if cfg.embed_model_key
+            OllamaEmbeddings(model=cfg.embed_model, base_url=cfg.base_url)
+            if cfg.embed_model
             else None
         )
 

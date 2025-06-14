@@ -28,7 +28,7 @@ class ScrapeWebsiteInput(BaseModel):
 
 
 class WebsiteQAConfig(BaseSettings):
-    provider_key: str = Field(...)
+    llm_client_key: str = Field(...)
     max_chunk_size: Optional[int] = Field(500)
     chunk_overlap: Optional[int] = Field(50)
 

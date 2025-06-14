@@ -4,7 +4,7 @@ from typing import Type
 from langchain.tools import StructuredTool
 from langchain_community.document_loaders import WebBaseLoader
 
-from macs.config.tools import ScrapeWebsiteInput
+from macs.config.tool import ScrapeWebsiteInput
 from macs.tools.registry import TOOL_REGISTRY
 
 

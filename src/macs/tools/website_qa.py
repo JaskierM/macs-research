@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Type
 from langchain.chains import RetrievalQA
 from langchain.tools import StructuredTool
@@ -7,8 +5,8 @@ from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-from macs.config.tools import WebsiteQAInput, WebsiteQAConfig
-from macs.provider.registry import PROVIDER_REGISTRY
+from macs.config.tool import WebsiteQAInput, WebsiteQAConfig
+from macs.llm_clients.registry import get_llm_client
 from macs.tools.registry import TOOL_REGISTRY
 
 
@@ -24,11 +22,11 @@ class WebsiteQATool(StructuredTool):
         super().__init__()
         cfg = cfg or WebsiteQAConfig()
 
-        self._provider = PROVIDER_REGISTRY.get(cfg.provider_key)()
-        self._embed_model = self._provider.get_embed_model()
+        self._llm = get_llm_client(cfg.llm_client_key).llm
+        self._embed_model = get_llm_client(cfg.llm_client_key).embed_model
         if self._embed_model is None:
             raise ValueError(
-                f"Embedding model not found in provider '{cfg.provider_key}'."
+                f"Embedding model not found in provider '{cfg.llm_client_key}'."
             )
 
         self._chunk_size = cfg.max_chunk_size
@@ -58,7 +56,7 @@ class WebsiteQATool(StructuredTool):
         vect = FAISS.from_documents(chunks, self._embed_model)
 
         qa = RetrievalQA.from_chain_type(
-            llm=self._provider.get_llm(),
+            llm=self._llm,
             retriever=vect.as_retriever(),
             return_source_documents=False,
         )
