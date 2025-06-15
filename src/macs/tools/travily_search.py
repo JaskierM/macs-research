@@ -2,7 +2,7 @@ from typing import Type
 from langchain.tools import StructuredTool
 from langchain_community.tools.tavily_search import TavilySearchResults
 
-from macs.config.tool import TavilySearchConfig, TavilySearchInput
+from macs.config.tools import TavilySearchConfig, TavilySearchInput
 from macs.tools.registry import TOOL_REGISTRY
 
 

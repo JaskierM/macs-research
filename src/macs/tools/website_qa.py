@@ -5,7 +5,7 @@ from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-from macs.config.tool import WebsiteQAInput, WebsiteQAConfig
+from macs.config.tools import WebsiteQAInput, WebsiteQAConfig
 from macs.llm_clients.registry import get_llm_client
 from macs.tools.registry import TOOL_REGISTRY
 

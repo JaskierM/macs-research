@@ -3,7 +3,7 @@ from langchain_ollama.chat_models import ChatOllama
 from langchain_ollama.embeddings import OllamaEmbeddings
 
 from macs.llm_clients.base import BaseLLMClient
-from macs.config.llm_client import OllamaConfig
+from macs.config.llm_clients import OllamaConfig
 from macs.llm_clients.registry import LLM_CLIENT_REGISTRY
 
 

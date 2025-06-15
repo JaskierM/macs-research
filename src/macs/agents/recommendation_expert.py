@@ -3,13 +3,13 @@ from langgraph.graph.graph import CompiledGraph
 from langgraph.checkpoint.memory import MemorySaver
 
 from macs.agents.base import BaseAgent
-from macs.config.agent import VulnResearcherConfig
+from macs.config.agent import RecommendationExpertConfig
 from macs.agents.registry import AGENT_REGISTRY
 
 
-class VulnResearcherAgent(BaseAgent):
+class RecommendationExpertAgent(BaseAgent):
 
-    def __init__(self, cfg: VulnResearcherConfig) -> None:
+    def __init__(self, cfg: RecommendationExpertConfig) -> None:
         super().__init__(cfg)
 
     def build(self) -> CompiledGraph:
@@ -23,6 +23,6 @@ class VulnResearcherAgent(BaseAgent):
         )
 
 
-@AGENT_REGISTRY.register("vuln_researcher")
-def build_vuln_researcher() -> CompiledGraph:
-    return VulnResearcherAgent(VulnResearcherConfig()).build()
+@AGENT_REGISTRY.register("recommendation_expert")
+def build_recommendation_expert() -> CompiledGraph:
+    return RecommendationExpertAgent(RecommendationExpertConfig()).build()
